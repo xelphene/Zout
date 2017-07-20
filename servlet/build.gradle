@@ -1,0 +1,63 @@
+apply plugin: "java"
+apply plugin: "war"
+apply plugin: "jetty"
+
+dependencies {
+	compile "javax.servlet:servlet-api:2.5"
+	compile project(':hash')
+}
+
+repositories {
+	mavenCentral()
+}
+
+task hashPassword(type: JavaExec) {
+
+	description 'Hash the plaintext password for inclusion in the servlet WAR file.'
+
+	// will contain sibling 'hash' project automatically thanks
+	// to the dependencies {} block above
+	classpath = sourceSets.main.runtimeClasspath
+
+	standardOutput = new ByteArrayOutputStream()
+
+	main = 'net.xelphene.zout.hash.HashGenerator'
+
+	doFirst {
+		if( ! project.hasProperty('password') ) {
+			throw new InvalidUserDataException('No password specified! Specify one with -Ppassword=thepassword on the gradle command line.')
+		} else {
+			args(password);
+		}
+	}
+
+	doLast {
+		ext.set("hash", standardOutput.toString().replace("\n",""))
+		println "hashed password: "+ext.get("hash")
+	}
+}
+
+war {
+	dependsOn hashPassword
+
+	doFirst {
+		println "embedding hash: "+project.hashPassword.get("hash")
+	
+		File f = file("$projectDir/build/password")
+		f.createNewFile()
+		f.text = project.hashPassword.get("hash")
+	}
+
+	webInf { 
+		from('./build/') {
+			include 'password'
+		}
+	}
+}
+
+
+// jetty plugin options (for development testing)
+httpPort = 8021
+stopPort = 8020
+stopKey = "fhHeCYIuQn"
+
