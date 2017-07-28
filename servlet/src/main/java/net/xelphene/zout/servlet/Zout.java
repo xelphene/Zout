@@ -19,11 +19,6 @@ public class Zout extends HttpServlet {
 
 	private Authenticator authenticator;
 
-	/*
-	Zout() {
-	}
-	*/
-
 	public void init() throws ServletException {
 		authenticator = new Authenticator();
 	}
@@ -32,8 +27,6 @@ public class Zout extends HttpServlet {
 	throws ServletException, IOException 
 	{
 		AuthenticationResult authResult = authenticator.authenticateRequest(getServletContext(), req);
-		//authResult = new AuthenticationResult(AuthenticationResult.INTERNAL_ERROR, "blah blah");
-		//authResult = new AuthenticationResult(AuthenticationResult.INVALID_REQUEST, "blah blah");
 		
 		if(
 			authResult.getResultCode()==AuthenticationResult.NO_AUTHZ_HEADER ||
@@ -68,41 +61,52 @@ public class Zout extends HttpServlet {
 	public void doGetAuthed(HttpServletRequest req, HttpServletResponse resp) 
 	throws ServletException, IOException
 	{
-		
 		resp.setContentType("text/plain");
-
 		PrintWriter out = resp.getWriter();
-		out.println("hello from Zout.");
 		
-		ArrayList<String> argv;
-		
+		String[] argv;
 		if( req.getParameter("argv")!=null ) {
 			argv = parseSingularArgv( req.getParameter("argv") );
 		} else {
 			argv = parseSplitArgv( req );
 		}
 		
-		out.println("--- uri ---");
-		out.println(req.getRequestURI());
-
-		out.println("--- qs ---");
-		out.println(req.getQueryString());
-		
-		out.println("--- argv ---");
-		for( String a : argv ) {
-			out.println(a);
+		if( argv.length==0 ) {
+			resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			out.println("Invalid query string parameters. No argv or argv<N> parameters present.");
+			return;
 		}
+
+		if( req.getParameter("debug")!=null ) {
+			out.println("Debug mode activated. Command will not be executed.");
+			out.println("--- argv ---");
+			for( String a : argv ) {
+				out.println(a);
+			}
+			out.println("---");
+			return;
+		}
+		
+		Process proc = Runtime.getRuntime().exec(argv);
+		InputStream ins = proc.getInputStream();
+		DataInputStream dis = new DataInputStream(ins);
+		String line = dis.readLine();
+		while( line!=null ) {
+			out.println(line);
+			line = dis.readLine();
+		}
+		proc.destroy();
 	}
 	
-	public ArrayList<String> parseSingularArgv( String param ) {
+	public String[] parseSingularArgv( String param ) {
 		ArrayList<String> argv = new ArrayList<>();
 		for( String a : param.split(" +") ) {
 			argv.add(a);
 		}
-		return argv;
+		return argv.toArray(new String[1]);
 	}
 	
-	public ArrayList<String> parseSplitArgv( HttpServletRequest req ) {
+	public String[] parseSplitArgv( HttpServletRequest req ) {
 		ArrayList<String> argv = new ArrayList<>();
 		HashMap<Integer, String> argvMap = new HashMap<>();
 		
@@ -119,7 +123,12 @@ public class Zout extends HttpServlet {
 				argvMap.put(new Integer(argvNum), req.getParameter(pName));
 			}
 		}
-		
+
+		if( argvMax==-1 ) {
+			// no arguments specified
+			return new String[0];
+		}
+
 		for( int i=0; i<=argvMax; i++ ) {
 			if( argvMap.containsKey(i) ) {
 				argv.add( argvMap.get(i) );
@@ -128,7 +137,7 @@ public class Zout extends HttpServlet {
 			}
 		}
 		
-		return argv;
+		return argv.toArray(new String[1]);
 	}
 
 }
