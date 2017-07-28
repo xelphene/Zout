@@ -27,9 +27,12 @@ URL and specify a command to execute with either a single "argv" query
 string parameter with spaces separating each argv component or with
 individually numbered argv<N> parameters.  Examples:
 
+Command: /bin/ls /tmp
 ```
 http://localhost:8021/servlet/?argv=/bin/ls%20/tmp
 ```
+
+Command: /bin/sh -c 'echo hi222 > /tmp/hi222'
 ```
 http://localhost:8021/servlet/?argv0=/bin/sh&argv1=-c&argv2=echo%20hi222%20%3E%20/tmp/hi222
 ```
