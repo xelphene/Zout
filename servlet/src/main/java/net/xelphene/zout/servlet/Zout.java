@@ -99,7 +99,7 @@ public class Zout extends HttpServlet {
 	}
 	
 	public String[] parseSingularArgv( String param ) {
-		ArrayList<String> argv = new ArrayList<>();
+		ArrayList<String> argv = new ArrayList<String>();
 		for( String a : param.split(" +") ) {
 			argv.add(a);
 		}
@@ -107,8 +107,8 @@ public class Zout extends HttpServlet {
 	}
 	
 	public String[] parseSplitArgv( HttpServletRequest req ) {
-		ArrayList<String> argv = new ArrayList<>();
-		HashMap<Integer, String> argvMap = new HashMap<>();
+		ArrayList<String> argv = new ArrayList<String>();
+		HashMap<Integer, String> argvMap = new HashMap<Integer, String>();
 		
 		Pattern paramPattern = Pattern.compile("^argv([0-9]+)$");
 		int argvMax=-1;
