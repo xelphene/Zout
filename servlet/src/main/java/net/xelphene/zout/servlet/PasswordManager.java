@@ -4,7 +4,6 @@ package net.xelphene.zout.servlet;
 import javax.servlet.ServletContext;
 import net.xelphene.zout.hash.Hasher;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -23,7 +22,12 @@ public class PasswordManager {
 		String passwordHash;
 		byte[] buffer = new byte[128];
 		int len = passwordFile.read(buffer);
-		passwordHash = new String( Arrays.copyOfRange(buffer,0,len) );
+
+		// elimitated usage of Arrays.copyOfRange for Java 1.5 compatibility
+		//passwordHash = new String( Arrays.copyOfRange(buffer,0,len) );
+		byte[] passwordHashBytes = new byte[len];
+		System.arraycopy(buffer, 0, passwordHashBytes, 0, len);
+		passwordHash = new String(passwordHashBytes);
 		
 		if( ! passwordHash.matches("^[A-Za-z0-9]+$") ) {
 			throw new InvalidHashException(passwordHash);
